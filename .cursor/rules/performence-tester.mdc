@@ -1,0 +1,113 @@
+---
+description:
+Rule — performance
+
+Purpose: Mesurer et améliorer les performances front (Core Web Vitals) et back (latence API, BDD Supabase), avec des budgets clairs et des preuves (rapports + captures).
+Trigger: avant release, après gros refactors FE/BE, régression de vitesse, ou seuils dépassés en prod.
+Inputs: URL preview/prod, endpoints clés, scripts k6/autocannon (si existants), requêtes SQL critiques.
+Output (Notion + repo/artifacts):
+
+Performance Report (résumé + tableaux budgets vs mesures)
+
+Lighthouse/ Web Vitals results (JSON/HTML)
+
+API Latency Table (P50/P95/P99, TTFB)
+
+DB Audit (EXPLAIN ANALYZE, index à créer, N+1)
+
+Action Plan (Quick Wins / High Impact / Follow-up)
+
+Default Budgets (web)
+
+LCP < 2.5s, INP < 200ms, CLS < 0.10
+
+TTFB < 500ms, FCP < 1.8s, TTI < 3.5s
+
+Default Budgets (API/DB)
+
+API P95 < 300ms, Error rate < 1%
+
+DB query P95 < 50ms sur chemins critiques
+
+Index hit rate > 95%, Cache hit > 80% (si cache)
+
+Tools
+Bash, WebFetch, mcp__playwright__*, Grep, Read, Edit, Write, MultiEdit
+(Optionnel via Bash : npx lighthouse, autocannon/k6, curl -w, psql EXPLAIN ANALYZE)
+
+Steps:
+
+ Scope & Baseline
+
+Lister pages clés (landing, dashboard, form) + endpoints critiques.
+
+Capturer baseline: Lighthouse (desktop+mobile), Web Vitals (Playwright user-flow si possible), curl -w TTFB/TTLB sur endpoints.
+
+Front-end Perf (Web)
+
+Lighthouse (mobile & desktop) → exporter JSON/HTML.
+
+Playwright user-flow: mesurer time-to-interactive per scénario (login → dashboard → action clé).
+
+Inspecter bundle: taille JS/CSS, nombre de requêtes, images non optimisées.
+
+Vérifier lazy-loading, code-splitting React, images (next-gen, dimensions), fonts (preload, display swap).
+
+Back-end Perf (API)
+
+autocannon/k6 léger sur endpoints CRUD/queries agrégées (1–5 min).
+
+Mesurer P50/P95/P99, TTFB, throughput, error rate.
+
+Pour requêtes lentes: EXPLAIN ANALYZE Supabase, vérifier index, joins, N+1, RLS cost.
+
+DB & RLS Audit
+
+Lister requêtes > P95 budget.
+
+Proposer index (colonne, ordre), matérialisation éventuelle, réduction payload (SELECT cols minimales).
+
+Vérifier RLS non “overly restrictive” causant scans inutiles.
+
+Remédiations & Budgets
+
+Classer en Quick Wins (compression images, preconnect, cache headers), High Impact (code-splitting routes, pagination, index DB), Follow-up.
+
+Mettre à jour performance budgets (CI possible) et noter critères d’échec.
+
+Validation
+
+Re-run tests après fixes.
+
+Comparer avant/après (tableaux).
+
+Publier Performance Report + artefacts (JSON/HTML/screens).
+
+Do:
+
+Mesures reproductibles (scripts + versions).
+
+Rapporter problème + impact (sur user flow / coût infra), pas seulement la solution technique.
+
+Prioriser Largest Contentful Paint & endpoints du happy path.
+
+Don’t:
+
+Optimiser prématurément des écrans peu utilisés.
+
+Conclure sans preuves (pas de rapport/artefacts).
+
+Confondre score Lighthouse et ressenti utilisateur (vérifier user-flows réels).
+
+Artifacts recommandés (fichiers)
+
+reports/lighthouse-{page}-{mobile|desktop}.html|json
+
+reports/webvitals-{flow}.json
+
+reports/api-latency.csv (route, P50/P95/P99, TTFB)
+
+reports/db-explain-{query}.txt
+globs:
+alwaysApply: true
+---

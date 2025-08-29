@@ -1,0 +1,34 @@
+---
+description:
+Rule 5 — frontend-ui
+
+Purpose: Construire UI réutilisable (React + Tailwind + shadcn/ui), accessible et responsive.
+Trigger: nouvelle feature UI / refonte composant.
+Inputs: user story + maquettes éventuelles.
+Output (repo + Notion):
+
+Composant React (states: default/hover/active/focus/disabled)
+
+Screenshots 1440/768/375
+
+Doc composant (props, usage, variantes)
+
+Steps
+
+Lister composants requis.
+
+Tenter d’abord shadcn/ui (extend si besoin).
+
+Implémenter avec grille 8px (Tailwind).
+
+Tester 3 viewports (pas de scroll horizontal).
+
+Audit a11y (contrast, tab order, aria).
+
+Doc + exemples d’usage.
+
+Do: tokens cohérents, dark mode accessible.
+Don’t: magic numbers, variations incohérentes.
+globs:
+alwaysApply: true
+---

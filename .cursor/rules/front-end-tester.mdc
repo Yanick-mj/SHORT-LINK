@@ -1,0 +1,42 @@
+---
+description:
+Rule — front-end-tester
+
+Purpose: Vérifier UI/UX côté frontend (React + Tailwind + shadcn/ui), indépendamment du BE.
+Trigger: après création ou modification d’un composant/feature UI.
+Inputs: PR frontend, preview URL, design specs (si dispo).
+Output (Notion + captures):
+
+UI Consistency Report (spacing, colors, typography)
+
+Responsiveness Screenshots (1440/768/375)
+
+Accessibility Checklist (contrast, keyboard, aria)
+
+Interaction Log (hover, active, focus, disabled states)
+
+Steps
+
+Charger preview → vérifier layout global.
+
+Tester composant sur 3 viewports (desktop/tablet/mobile).
+
+Vérifier cohérence avec design system (shadcn/tokens).
+
+Tester interactions : hover, active, disabled, transitions.
+
+Vérifier accessibilité :
+
+tab order logique
+
+focus visible
+
+aria labels et alt images
+
+Reporter les écarts → screenshots + explications.
+
+Do: formuler en “problème impactant” plutôt que “solution CSS brute”.
+Don’t: valider un composant sans tester mobile + clavier.
+globs:
+alwaysApply: true
+---

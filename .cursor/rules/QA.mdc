@@ -1,0 +1,34 @@
+---
+description:
+Rule 6 — qa-testing
+
+Purpose: Garantir qualité via Playwright (flows, edge cases, responsive, a11y).
+Trigger: avant merge/release, J4–J5.
+Inputs: critères d’acceptation, URL preview.
+Output (Notion + artifacts):
+
+QA Report (Blocker/High/Medium/Nit)
+
+Screenshots (3 viewports)
+
+Scripts tests/e2e/*.spec.ts
+
+Steps
+
+Dériver cas de test depuis acceptance criteria.
+
+Lancer 3 viewports (1440, 768, 375).
+
+Tester happy path, erreurs, empty/loading.
+
+Vérifier a11y clavier (tab/focus/enter/space).
+
+Capturer screenshots/console logs.
+
+Triage + création tickets.
+
+Do: preuves concrètes, messages reproductibles.
+Don’t: “ça marche chez moi” sans artefacts.
+globs:
+alwaysApply: true
+---

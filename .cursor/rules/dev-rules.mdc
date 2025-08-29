@@ -1,0 +1,15 @@
+---
+description:
+- always read the real code, before implementation
+- always avoid complexity
+- after implementation always read the code for a code
+review
+- Code review self-done
+- No console.logs
+- Responsive design
+- Error handling
+-Ne casse pas ce qui fonctionne
+
+globs:
+alwaysApply: true
+---
