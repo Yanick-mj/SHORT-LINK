@@ -13,4 +13,28 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Séparer les dépendances lourdes
+          'react-vendor': ['react', 'react-dom'],
+          'router-vendor': ['react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-alert-dialog', '@radix-ui/react-dropdown-menu'],
+          'utils-vendor': ['yup', 'lucide-react'],
+          'supabase-vendor': ['@supabase/supabase-js']
+        }
+      }
+    },
+    // Optimisations pour réduire la taille
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
+    // Augmenter la limite d'avertissement
+    chunkSizeWarningLimit: 1000
+  }
 })
