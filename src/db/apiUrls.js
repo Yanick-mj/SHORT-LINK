@@ -39,9 +39,6 @@ export async function createUrl({ original_url, title, custom_url, user_id }) {
       short_url = generateShortUrl();
     }
 
-    // Générer un QR code pour l'URL
-    const qrCodeUrl = await generateQRCode(`https://short.in/${short_url}`);
-
     const { data, error } = await supabase
       .from("urls")
       .insert({
@@ -49,8 +46,7 @@ export async function createUrl({ original_url, title, custom_url, user_id }) {
         title,
         short_url,
         custom_url: custom_url || null,
-        user_id,
-        qr: qrCodeUrl
+        user_id
       })
       .select();
 
@@ -72,12 +68,7 @@ function generateShortUrl() {
   return result;
 }
 
-// Fonction pour générer un QR code (placeholder)
-async function generateQRCode(url) {
-  // Pour l'instant, retourner une URL placeholder
-  // En production, vous pourriez utiliser une API comme QR Server
-  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-}
+
 
 // Fonction pour supprimer une URL
 export async function deleteUrl(url_id) {

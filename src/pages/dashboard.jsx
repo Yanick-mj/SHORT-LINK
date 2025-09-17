@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { BarLoader } from 'react-spinners';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/pages/context';
 import { getUrls, deleteUrl } from '@/db/apiUrls';
-import { getClicks } from '@/db/apiClicks';
+import { getClicksCounts } from '@/db/apiClicks';
+import { logger } from '@/lib/logger';
 import LinkCard from '@/components/link-card';
 import CreateLinkDialog from '@/components/create-link-dialog';
 import { useSearchParams } from 'react-router-dom';
@@ -20,6 +23,7 @@ const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const [shouldOpenDialog, setShouldOpenDialog] = useState(false);
   const [prefilledUrl, setPrefilledUrl] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Fonction fetchData principale
   const fetchData = async () => {
@@ -32,22 +36,17 @@ const Dashboard = () => {
       // 1. Récupérer toutes les URLs de l'utilisateur
       const urls = await getUrls(user.id);
 
-      // 2. Récupérer les clics pour chaque URL
-      const urlsWithClicks = await Promise.all(
-        urls.map(async (url) => {
-          const clicks = await getClicks(url.id);
-          return {
-            ...url,
-            clicks: clicks,
-            totalClicks: clicks.length
-          };
-        })
-      );
+      // 2. Récupérer les compteurs de clics groupés (évite N+1)
+      const counts = await getClicksCounts(urls.map((u) => u.id));
+      const urlsWithClicks = urls.map((url) => ({
+        ...url,
+        totalClicks: counts[url.id] || 0,
+      }));
 
       setUrlsData(urlsWithClicks);
 
     } catch (err) {
-      console.error('Erreur lors du chargement des données:', err);
+      logger.error('Erreur lors du chargement des données:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -81,7 +80,7 @@ const Dashboard = () => {
       // Recharger les données après suppression
       fetchData();
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
+      logger.error('Erreur lors de la suppression:', error);
     }
   };
 
@@ -90,6 +89,8 @@ const Dashboard = () => {
     fetchData();
     setShouldOpenDialog(false);
     setPrefilledUrl('');
+    setSuccessMessage('Lien créé avec succès');
+    setTimeout(() => setSuccessMessage(''), 3000);
   };
 
   // Calculer les statistiques avec useMemo pour optimiser les performances
@@ -110,18 +111,34 @@ const Dashboard = () => {
   // Gestion des erreurs
   if (error) {
     return (
-      <div className='flex flex-col gap-4'>
-        <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>
-          <strong>Erreur :</strong> {error}
-        </div>
+      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Erreur :</strong> {error}
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
+      {/* Succès */}
+      {successMessage && (
+        <Alert className="mb-4 border-green-500 bg-green-50" role="status" aria-live="polite">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-700">
+            {successMessage}
+          </AlertDescription>
+        </Alert>
+      )}
       {/* Loading */}
-      {loading && <BarLoader width={"100%"} color="#36d7b7" />}
+      {loading && (
+        <div className="mb-6">
+          <BarLoader width={"100%"} color="#36d7b7" />
+        </div>
+      )}
 
       {/* Statistiques */}
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 xl:gap-10 mb-6 sm:mb-8 lg:mb-10 xl:mb-12'>
@@ -173,7 +190,15 @@ const Dashboard = () => {
 
       {/* Liste des URLs */}
       <div className='space-y-4 sm:space-y-6 lg:space-y-8 xl:space-y-10'>
-        {filteredUrls.length === 0 && !loading ? (
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className='border bg-gray-100 rounded-lg p-6 animate-pulse'>
+              <div className='h-5 w-1/3 bg-gray-300 rounded mb-3'></div>
+              <div className='h-4 w-2/3 bg-gray-200 rounded mb-2'></div>
+              <div className='h-4 w-1/4 bg-gray-200 rounded'></div>
+            </div>
+          ))
+        ) : filteredUrls.length === 0 ? (
           <div className='text-center py-8 sm:py-12 lg:py-16 xl:py-20 text-gray-500 text-lg sm:text-xl xl:text-2xl'>
             {searchQuery ? 'Aucun lien trouvé' : 'Aucun lien créé pour le moment'}
           </div>

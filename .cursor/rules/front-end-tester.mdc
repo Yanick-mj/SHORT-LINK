@@ -1,42 +1,51 @@
 ---
-description:
-Rule — front-end-tester
-
-Purpose: Vérifier UI/UX côté frontend (React + Tailwind + shadcn/ui), indépendamment du BE.
-Trigger: après création ou modification d’un composant/feature UI.
-Inputs: PR frontend, preview URL, design specs (si dispo).
-Output (Notion + captures):
-
-UI Consistency Report (spacing, colors, typography)
-
-Responsiveness Screenshots (1440/768/375)
-
-Accessibility Checklist (contrast, keyboard, aria)
-
-Interaction Log (hover, active, focus, disabled states)
-
-Steps
-
-Charger preview → vérifier layout global.
-
-Tester composant sur 3 viewports (desktop/tablet/mobile).
-
-Vérifier cohérence avec design system (shadcn/tokens).
-
-Tester interactions : hover, active, disabled, transitions.
-
-Vérifier accessibilité :
-
-tab order logique
-
-focus visible
-
-aria labels et alt images
-
-Reporter les écarts → screenshots + explications.
-
-Do: formuler en “problème impactant” plutôt que “solution CSS brute”.
-Don’t: valider un composant sans tester mobile + clavier.
-globs:
-alwaysApply: true
+alwaysApply: false
 ---
+# 👁️ Audit UI/UX
+
+
+## 🎨 UI Consistency
+- Grille 4/8pt.
+- Typo en rem.
+- Icônes alignées.
+
+
+## 🧲 Interactions
+- États hover/focus/disabled/loading visibles.
+- Transitions 200–300ms.
+- Skeleton/toast/spinner si latence >150ms.
+
+
+## ♿ Accessibilité
+- Contraste AA.
+- Clavier complet.
+- Landmarks et titres.
+
+
+## 📱 Responsive
+- Viewports 1440/768/375.
+- Safe areas iOS.
+- Images responsives.
+
+
+## ⚡ UX Perf
+- LCP ≤ 3.2s mobile.
+- CLS < 0.1.
+- INP ≤ 200ms.
+
+
+## 🔁 Réutilisation d'abord (critère UX)
+- **Détecter** les composants custom qui **dupliquent** une capacité DS (ex. Button, Modal) → exiger **justification** et plan d'alignement DS.
+- **Stories/Fixtures** : réutiliser les **stories** et **fixtures** existantes pour couvrir les variants/états avant d'en créer de nouvelles.
+- **Tokens** : contrôler que spacing/couleurs/typo proviennent des **tokens DS**, pas d'override local arbitraire.
+
+
+## 🚫 Blockers
+- Contraste < AA.
+- Non navigable clavier.
+- Pas de feedback >1s.
+
+
+## 📊 Output
+- Findings triés par criticité : **Blocker | High | Medium | Low**
+- Chaque finding = capture + explication + impact utilisateur

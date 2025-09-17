@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Download, Copy, Trash, Check, ArrowLeft } from 'lucide-react';
+import { Copy, Trash, Check, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -21,6 +21,9 @@ import DeviceStats from '@/components/device-stats';
 import { getUrlById, deleteUrl } from '@/db/apiUrls';
 import { getClicks } from '@/db/apiClicks';
 import { LinkIcon } from 'lucide-react';
+import { getShortLink } from '@/lib/utils';
+import ShortLinkButton from '@/components/short-link-button';
+import { logger } from '@/lib/logger';
 
 
 const Link = () => {
@@ -31,8 +34,8 @@ const Link = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isCopied, setIsCopied] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const DOMAIN = import.meta.env.VITE_PUBLIC_SHORT_DOMAIN || 'https://short.in';
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('success');
 
@@ -69,42 +72,16 @@ const Link = () => {
 
   const handleCopyClick = async () => {
     try {
-      const shortUrl = `https://short.in/${urlData?.custom_url ? urlData?.custom_url : urlData?.short_url}`;
+      const shortUrl = getShortLink(urlData);
       await navigator.clipboard.writeText(shortUrl);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
-      console.error('Erreur lors de la copie:', error);
+      logger.error('Erreur lors de la copie:', error);
     }
   };
 
-  const handleDownloadClick = async () => {
-    try {
-      setIsDownloading(true);
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-
-        const link = document.createElement('a');
-        link.download = `qr-${urlData.title || 'link'}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-
-        setIsDownloading(false);
-      };
-
-      img.src = urlData?.qr;
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
-      setIsDownloading(false);
-    }
-  };
 
   const handleDeleteClick = async () => {
     try {
@@ -120,7 +97,7 @@ const Link = () => {
       }, 2000);
 
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
+      logger.error('Erreur lors de la suppression:', error);
       setAlertType('destructive');
       setAlertMessage('Erreur lors de la suppression du lien');
       setIsDeleting(false);
@@ -129,10 +106,42 @@ const Link = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <div className="text-center space-y-4">
-          <BarLoader width="200px" color="#3B82F6" />
-          <p className="text-gray-600">Chargement des détails...</p>
+      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
+        <div className="space-y-6 sm:space-y-8 md:space-y-10">
+          {/* Header skeleton */}
+          <div className="h-10 w-28 bg-gray-200 rounded animate-pulse" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+            {/* Colonne gauche - carte infos skeleton */}
+            <div className="bg-white border rounded-lg p-4 sm:p-6 lg:p-8 animate-pulse">
+              <div className="h-8 w-2/3 bg-gray-200 rounded mb-4" />
+              <div className="space-y-3">
+                <div className="h-5 w-3/4 bg-gray-100 rounded" />
+                <div className="h-4 w-1/2 bg-gray-100 rounded" />
+                <div className="h-4 w-1/3 bg-gray-100 rounded" />
+                <div className="flex gap-2 mt-4">
+                  <div className="h-9 w-20 bg-gray-100 rounded" />
+                  <div className="h-9 w-24 bg-gray-100 rounded" />
+                </div>
+              </div>
+            </div>
+
+            {/* Colonne droite - stats skeleton */}
+            <div className="space-y-4">
+              <div className="bg-white border rounded-lg p-4 sm:p-6 lg:p-8 animate-pulse">
+                <div className="h-6 w-40 bg-gray-200 rounded mb-4" />
+                <div className="h-10 w-24 bg-gray-100 rounded" />
+              </div>
+              <div className="bg-white border rounded-lg p-4 sm:p-6 lg:p-8 animate-pulse">
+                <div className="h-6 w-48 bg-gray-200 rounded mb-4" />
+                <div className="h-24 w-full bg-gray-100 rounded" />
+              </div>
+              <div className="bg-white border rounded-lg p-4 sm:p-6 lg:p-8 animate-pulse">
+                <div className="h-6 w-44 bg-gray-200 rounded mb-4" />
+                <div className="h-24 w-full bg-gray-100 rounded" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -187,14 +196,12 @@ const Link = () => {
               </CardHeader>
               <CardContent className="space-y-2 sm:space-y-3 lg:space-y-4 p-4 sm:p-6 lg:p-8">
                 <div>
-                  <p className="text-lg text-blue-600 break-all">
-                    https://short.in/{urlData?.custom_url ? urlData?.custom_url : urlData?.short_url}
-                  </p>
+                  <ShortLinkButton link={urlData} className="text-lg text-blue-500 hover:text-blue-400" />
                 </div>
 
                 <div className="flex items-center">
                   <LinkIcon className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <p className="text-sm break-all">{urlData?.original_url}</p>
+                  <p className="text-sm break-all truncate max-w-full" title={urlData?.original_url}>{urlData?.original_url}</p>
                 </div>
 
                 {urlData?.custom_url && (
@@ -212,30 +219,24 @@ const Link = () => {
                     minute: '2-digit'
                   })}</p>
                 </div>
-                <div className='flex gap-2 '>
+                <div className='flex gap-2 min-h-[44px] items-center'>
                   <Button
                     variant="ghost"
                     onClick={handleCopyClick}
                     disabled={isCopied}
                     title="Copier le lien"
+                    className="min-h-[44px] min-w-[44px]"
                   >
                     {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                   </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={handleDownloadClick}
-                    disabled={isDownloading}
-                    title="Télécharger le QR code"
-                  >
-                    <Download className={`h-4 w-4 ${isDownloading ? 'animate-pulse' : ''}`} />
-                  </Button>
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="ghost"
                         disabled={isDeleting}
                         title="Supprimer le lien"
-                        className="hover:text-red-700"
+                        className="hover:text-red-700 min-h-[44px] min-w-[44px]"
                       >
                         <Trash className={`h-4 w-4 ${isDeleting ? 'animate-pulse' : ''}`} />
                       </Button>
@@ -259,13 +260,7 @@ const Link = () => {
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-                <div>
-                  <img
-                    src={urlData?.qr}
-                    alt="QR Code"
-                    className=" w-full object-contain border rounded-lg"
-                  />
-                </div>
+
               </CardContent>
             </Card>
           </div>

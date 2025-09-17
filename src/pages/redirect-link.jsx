@@ -34,8 +34,8 @@ const RedirectLink = () => {
           // Continuer même si l'enregistrement du clic échoue
         }
 
-        // Rediriger vers l'URL originale
-        window.location.href = url.original_url;
+        // Rediriger vers l'URL originale sans polluer l'historique (permet de revenir au dashboard)
+        window.location.replace(url.original_url);
 
       } catch (err) {
         console.error('Erreur lors de la redirection:', err);

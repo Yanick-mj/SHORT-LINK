@@ -1,0 +1,61 @@
+---
+alwaysApply: false
+---
+
+
+# 🔍 Code Review
+
+
+## 🧱 Architecture
+- Separation logique/UI.
+- `useEffect` justifié + cleanup.
+- Keys stables; pas d’index.
+
+
+## 🧷 TypeScript
+- Strict mode; pas d’`any`.
+- Zod/valibot pour I/O.
+- Unions discriminées.
+
+
+## 🎨 Styling
+- Variants via `cva`.
+- Classes ordonnées.
+- Pas de `!important`.
+
+
+## ⚡ Performance
+- INP ≤ 200ms; CLS < 0.1.
+- Split; virtualisation >100 items.
+
+
+## 🛡️ Sécurité
+- Aucun secret en diff.
+- Pas de `dangerouslySetInnerHTML`.
+- URLs validées; rel noopener.
+
+
+## 🧪 Tests
+- Unitaires + e2e critiques.
+- Storybook complet.
+- Budgets bundle respectés.
+
+
+## 🔁 Réutilisation d'abord
+- **Composants** : réutiliser d'abord **shadcn/ui**, **Radix primitives** et composants internes du **Design System**. Créer un composant custom uniquement si l'écart est **justifié** (ADR court) et prévoir une **API compatible** + ajout au DS (doc, story, tests).
+- **Hooks/Services** : préférer les **hooks utilitaires existants** (fetcher, error boundary, logger, analytics, form utils) plutôt que réécrire. Factoriser la logique partagée dans `features/<x>/hooks` ou `shared/hooks`.
+- **Styling/Tokens** : utiliser **tokens existants** et **patterns cva** ; éviter CSS ad‑hoc si un token/variant existe. Pas d'introduction de nouvelle palette sans validation DS.
+- **Dépendances** : éviter d'ajouter une lib faisant **doublon** avec l'existant ; privilégier les **imports nommés** (tree‑shaking) des libs déjà en place.
+
+
+## 🚫 Blockers
+- Secrets exposés.
+- XSS.
+- A11y KO.
+- Budgets non respectés.
+
+
+## 🧰 Commandes
+```bash
+pnpm lint && pnpm typecheck && pnpm test
+pnpm size-limit

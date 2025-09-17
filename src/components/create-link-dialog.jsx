@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { createUrl } from '@/db/apiUrls';
 import { useAuth } from '@/pages/context';
+import * as yup from 'yup';
 
 const CreateLinkDialog = ({ onSuccess, open: externalOpen, onOpenChange: externalOnOpenChange, prefilledUrl }) => {
   const { user } = useAuth();
@@ -26,65 +27,64 @@ const CreateLinkDialog = ({ onSuccess, open: externalOpen, onOpenChange: externa
   });
   const [errors, setErrors] = useState({});
 
+  const schema = yup.object({
+    original_url: yup
+      .string()
+      .required('URL originale est requise')
+      .url('URL invalide'),
+    title: yup
+      .string()
+      .trim()
+      .required('Titre est requis')
+      .max(120, 'Titre trop long (120 caractères max)'),
+    custom_url: yup
+      .string()
+      .trim()
+      .matches(/^[a-zA-Z0-9-]*$/, 'URL personnalisée invalide (lettres, chiffres, tirets uniquement)'),
+  });
+
   // Utiliser l'état externe si fourni, sinon utiliser l'état interne
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
 
-  const handleInputChange = (e) => {
+  const handleInputChange = async (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.original_url.trim()) {
-      newErrors.original_url = 'URL originale est requise';
-    } else if (!isValidUrl(formData.original_url)) {
-      newErrors.original_url = 'URL invalide';
-    }
-
-    if (!formData.title.trim()) {
-      newErrors.title = 'Titre est requis';
-    }
-
-    if (formData.custom_url && !isValidCustomUrl(formData.custom_url)) {
-      newErrors.custom_url = 'URL personnalisée invalide (lettres, chiffres, tirets uniquement)';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const isValidUrl = (string) => {
     try {
-      new URL(string);
+      await schema.validateAt(name, { ...formData, [name]: value });
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    } catch (validationErr) {
+      setErrors(prev => ({ ...prev, [name]: validationErr.message }));
+    }
+  };
+
+  const validateForm = async () => {
+    try {
+      await schema.validate(formData, { abortEarly: false });
+      setErrors({});
       return true;
-    } catch (_) {
+    } catch (err) {
+      const newErrors = {};
+      if (err.inner) {
+        err.inner.forEach((e) => {
+          if (e.path && !newErrors[e.path]) newErrors[e.path] = e.message;
+        });
+      } else if (err.path) {
+        newErrors[err.path] = err.message;
+      }
+      setErrors(newErrors);
       return false;
     }
-  };
-
-  const isValidCustomUrl = (string) => {
-    return /^[a-zA-Z0-9-]+$/.test(string);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    const ok = await validateForm();
+    if (!ok) return;
 
     try {
       setLoading(true);
@@ -110,8 +110,7 @@ const CreateLinkDialog = ({ onSuccess, open: externalOpen, onOpenChange: externa
         onSuccess();
       }
     } catch (error) {
-      console.error('Erreur lors de la création:', error);
-      setErrors({ submit: error.message });
+      setErrors({ submit: error.message || 'Erreur lors de la création' });
     } finally {
       setLoading(false);
     }
@@ -166,10 +165,12 @@ const CreateLinkDialog = ({ onSuccess, open: externalOpen, onOpenChange: externa
               placeholder="https://example.com/very-long-url"
               value={formData.original_url}
               onChange={handleInputChange}
+              aria-invalid={!!errors.original_url}
+              aria-describedby={errors.original_url ? 'error-original_url' : undefined}
               className={errors.original_url ? 'border-red-500' : ''}
             />
             {errors.original_url && (
-              <p className="text-sm text-red-500">{errors.original_url}</p>
+              <p id="error-original_url" className="text-sm text-red-500">{errors.original_url}</p>
             )}
           </div>
 
@@ -181,10 +182,12 @@ const CreateLinkDialog = ({ onSuccess, open: externalOpen, onOpenChange: externa
               placeholder="Mon lien personnalisé"
               value={formData.title}
               onChange={handleInputChange}
+              aria-invalid={!!errors.title}
+              aria-describedby={errors.title ? 'error-title' : undefined}
               className={errors.title ? 'border-red-500' : ''}
             />
             {errors.title && (
-              <p className="text-sm text-red-500">{errors.title}</p>
+              <p id="error-title" className="text-sm text-red-500">{errors.title}</p>
             )}
           </div>
 
@@ -198,11 +201,13 @@ const CreateLinkDialog = ({ onSuccess, open: externalOpen, onOpenChange: externa
                 placeholder="mon-lien"
                 value={formData.custom_url}
                 onChange={handleInputChange}
+                aria-invalid={!!errors.custom_url}
+                aria-describedby={errors.custom_url ? 'error-custom_url' : undefined}
                 className={errors.custom_url ? 'border-red-500' : ''}
               />
             </div>
             {errors.custom_url && (
-              <p className="text-sm text-red-500">{errors.custom_url}</p>
+              <p id="error-custom_url" className="text-sm text-red-500">{errors.custom_url}</p>
             )}
             <p className="text-xs text-gray-500">
               Laissez vide pour générer automatiquement

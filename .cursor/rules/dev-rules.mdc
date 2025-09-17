@@ -1,15 +1,220 @@
 ---
-description:
-- always read the real code, before implementation
-- always avoid complexity
-- after implementation always read the code for a code
-review
-- Code review self-done
-- No console.logs
-- Responsive design
-- Error handling
--Ne casse pas ce qui fonctionne
+description: |
+  Règles de développement et bonnes pratiques pour Cursor AI.
+  Ces règles garantissent un code propre, sécurisé et maintenable.
 
 globs:
+  - "**/*.{js,jsx,ts,tsx,vue,py,php,go,rs,java,c,cpp,css,scss,html}"
 alwaysApply: true
 ---
+
+# Règles de Développement et Sécurité
+
+## 🔍 Analyse et Compréhension
+- **TOUJOURS** lire et comprendre le code existant avant toute modification
+- Analyser l'architecture actuelle et les patterns utilisés
+- Identifier les dépendances et les impacts potentiels
+- Poser des questions de clarification si le contexte n'est pas clair
+
+## 🛡️ Sécurité (PRIORITÉ ABSOLUE)
+
+### Détection de secrets
+- **SCANNER** automatiquement le code pour les secrets avant tout conseil
+- **REFUSER** catégoriquement tout push contenant des secrets
+- Patterns à détecter : `password=`, `api_key=`, `secret=`, `token=`, clés AWS, tokens GitHub, etc.
+- Vérifier que les fichiers `.env*` ne sont pas commités
+
+### Fichiers sensibles
+- Alerter si `.env`, `*.pem`, `*.key`, `credentials.json` sont dans les fichiers à commiter
+- Vérifier que `.gitignore` contient les exclusions appropriées
+- Suggérer l'utilisation de variables d'environnement
+
+### Commandes de vérification obligatoires
+```bash
+# Avant tout push, suggérer :
+git diff --cached | grep -E "(password|api_key|secret|token)" || echo "✅ Aucun secret détecté"
+gitleaks detect --source . || echo "⚠️ Gitleaks recommandé pour la sécurité"
+```
+
+## 🎯 Principes de Code
+
+### Simplicité et lisibilité
+- **ÉVITER** la complexité inutile - privilégier les solutions simples
+- Code auto-documenté avec des noms explicites
+- Une fonction = une responsabilité
+- Éviter les imbrications profondes (max 3 niveaux)
+
+### Qualité et maintenance
+- **JAMAIS** de `console.log()` en production (utiliser un logger approprié)
+- Gestion d'erreur systématique avec try-catch ou équivalent
+- **NE JAMAIS** casser ce qui fonctionne - tests de régression
+- Code review automatique après chaque implémentation
+
+## 📱 Design et UX
+
+### Responsive design
+- Mobile-first approach obligatoire
+- Breakpoints standards : 320px, 768px, 1024px, 1440px
+- Images optimisées et lazy loading
+- Performance : Core Web Vitals respectés
+
+### Accessibilité
+- Attributs `alt` sur les images
+- Navigation clavier fonctionnelle
+- Contraste suffisant (WCAG AA minimum)
+- Labels appropriés sur les formulaires
+
+## 🔧 Gestion d'erreurs
+
+### Frontend
+```javascript
+// ✅ Bon
+try {
+  const data = await fetchData();
+  handleSuccess(data);
+} catch (error) {
+  logger.error('Erreur lors du fetch:', error);
+  showUserFriendlyError();
+}
+
+// ❌ Mauvais
+const data = await fetchData(); // Pas de gestion d'erreur
+console.log(data); // Console.log interdit
+```
+
+### Backend
+- Status codes HTTP appropriés
+- Messages d'erreur utilisateur vs développeur séparés
+- Logs structurés avec niveaux appropriés
+- Fallbacks et circuit breakers pour les services externes
+
+## 📊 Performance
+
+### Optimisations
+- Lazy loading des composants lourds
+- Mise en cache appropriée
+- Optimisation des requêtes DB (éviter N+1)
+- Compression des assets
+
+### Monitoring
+- Métriques de performance
+- Alertes sur les seuils critiques
+- Profiling régulier du code critique
+
+## 🧪 Tests et Validation
+
+### Tests obligatoires
+- Tests unitaires pour la logique métier
+- Tests d'intégration pour les APIs
+- Tests E2E pour les parcours critiques
+- Tests de sécurité pour les endpoints sensibles
+
+### Code review automatique
+Après chaque implémentation, vérifier :
+- [ ] Le code respecte les conventions du projet
+- [ ] Pas de secrets ou données sensibles
+- [ ] Gestion d'erreurs appropriée
+- [ ] Performance acceptable
+- [ ] Tests passants
+- [ ] Documentation à jour
+
+## 🌐 APIs et Intégrations
+
+### Sécurité des APIs
+- Authentification/autorisation sur tous les endpoints sensibles
+- Validation des inputs côté serveur
+- Rate limiting approprié
+- CORS configuré correctement
+
+### Documentation
+- OpenAPI/Swagger pour les APIs REST
+- Exemples d'utilisation
+- Codes d'erreur documentés
+
+## 📁 Structure et Organisation
+
+### Architecture
+- Séparation claire des responsabilités
+- Patterns appropriés au contexte (MVC, Clean Architecture, etc.)
+- Dossiers organisés par feature ou par type
+- Configuration centralisée
+
+### Nommage
+- Variables : `camelCase` (JS/TS), `snake_case` (Python)
+- Fonctions : verbes explicites (`getUserById`, `calculateTotal`)
+- Classes : PascalCase (`UserService`, `PaymentProcessor`)
+- Constantes : UPPER_SNAKE_CASE
+
+## 🚀 Déploiement et CI/CD
+
+### Avant déploiement
+- Tous les tests passent
+- Build sans warnings
+- Scan de sécurité effectué
+- Variables d'environnement vérifiées
+
+### Pipeline de qualité
+1. Lint et formatage automatique
+2. Tests unitaires et d'intégration
+3. Scan de sécurité (SAST/DAST)
+4. Vérification des dépendances
+5. Déploiement progressif (staging puis prod)
+
+## ⚡ Commandes Utiles
+
+### Vérifications pré-commit
+```bash
+# Sécurité
+git diff --cached | grep -E "(password|api_key|secret|token)"
+gitleaks detect --source .
+
+# Qualité
+npm run lint
+npm run test
+npm run build
+
+# Performance
+npm audit
+yarn outdated
+```
+
+### Outils recommandés
+- **Sécurité** : gitleaks, git-secrets, snyk
+- **Qualité** : ESLint, Prettier, SonarQube
+- **Performance** : Lighthouse, WebPageTest
+- **Tests** : Jest, Cypress, Playwright
+
+## 🚨 Alertes Automatiques
+
+### Si secrets détectés :
+```
+⚠️ ALERTE SÉCURITÉ - Push bloqué
+Secret détecté dans le code. Actions requises :
+1. Supprimer le secret
+2. Utiliser une variable d'environnement
+3. Ajouter .env* au .gitignore
+```
+
+### Si console.log détecté :
+```
+⚠️ Console.log détecté
+Remplacer par un système de logging approprié :
+- Frontend : logger.info(), logger.error()
+- Backend : Winston, Pino, ou équivalent
+```
+
+## 📋 Checklist Finale
+
+Avant chaque commit/push :
+- [ ] ✅ Code lu et compris
+- [ ] 🔒 Aucun secret exposé
+- [ ] 🧹 Code propre et simple
+- [ ] 📱 Responsive design
+- [ ] ⚠️ Gestion d'erreurs
+- [ ] 🧪 Tests passants
+- [ ] 🔍 Code review effectué
+- [ ] 📚 Documentation mise à jour
+
+---
+
+**RAPPEL** : Ces règles sont non-négociables. La sécurité et la qualité priment toujours sur la rapidité de développement.

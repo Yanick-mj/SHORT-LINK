@@ -11,6 +11,24 @@ export async function getClicks(url_id) {
   return data || [];
 }
 
+// Récupère les compteurs de clics pour une liste d'URL en une seule requête
+export async function getClicksCounts(urlIds) {
+  if (!Array.isArray(urlIds) || urlIds.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("clicks")
+    .select("url_id")
+    .in("url_id", urlIds);
+
+  if (error) throw new Error(error.message);
+
+  const counts = {};
+  for (const row of data || []) {
+    counts[row.url_id] = (counts[row.url_id] || 0) + 1;
+  }
+  return counts;
+}
+
 // Fonction pour insérer un nouveau clic
 export async function insertClick(url_id) {
   try {

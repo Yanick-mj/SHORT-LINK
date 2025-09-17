@@ -1,0 +1,36 @@
+---
+alwaysApply: false
+---
+# 🚀 Déploiement
+
+
+## 📈 Budgets
+- LCP ≤ 3.2s mobile.
+- INP ≤ 200ms.
+- CLS < 0.1.
+- Bundle ≤ 200KB gzip.
+
+
+## 🔐 Sécurité
+- Aucun secret.
+- En-têtes HSTS, CSP.
+- npm audit clean.
+
+
+## 🧪 CI/CD
+- Lint, typecheck, test, build verts.
+- Lighthouse CI OK.
+- Size-limit OK.
+
+
+## 🔁 Réutilisation d'abord (CI/CD)
+- **Pipelines** : réutiliser les **workflows** GitHub Actions standard (`.github/workflows/*.yml`) et **jobs** partagés (lint, typecheck, test, size‑limit, lhci) ; éviter scripts custom si un job existe.
+- **Caches** : utiliser les **caches** communs (pnpm/node, Playwright, Next) ; ne pas multiplier les clés.
+- **Sécurité** : s'appuyer sur le **baseline** (npm audit, Snyk, gitleaks) et la **CSP/HSTS** commune ; pas d'écart sans ADR.
+- **Infra** : réutiliser modules IaC/terraform standard quand applicable.
+
+
+## 🚫 Blockers
+- Perf budgets non respectés.
+- Secrets détectés.
+- CI rouge.

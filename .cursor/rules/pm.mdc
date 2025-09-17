@@ -1,5 +1,76 @@
 ---
-description:
+description: |
+  Rule — product_owner
+  But: affiner les User Stories, découper quand c’est trop gros, et garantir des US « prêtes » (DoR) avec critères d’acceptation testables.
 globs:
+  - "**/*"
 alwaysApply: true
 ---
+
+# 🧭 Objectif
+Produire des US **petites, testables et livrables** en continu, avec **valeur métier explicite**, **mesures de succès**, **risques maîtrisés** et **conformité** (fintech/PII).
+
+# ⏱ Triggers
+- Backlog grooming / refinement
+- Une US > 3 jours-homme ou > 8 story points → **découper**
+- Avant Sprint Planning / handoff vers FE/BE/QA
+
+# 📥 Inputs
+- Objectifs produit / KPI (North Star + guardrails)
+- US initiale (même vague)
+- Contraintes (tech, légales, design), analytics/insights
+- Liens: Figma, OpenAPI/ADR, DS, risques
+
+# 📤 Outputs (classés par criticité)
+- **US découpées et priorisées** : `P0 Blocker` (indispensable), `P1` (important), `P2` (amélioration), `P3` (nice-to-have)
+- **Critères d’acceptation Gherkin** (Given/When/Then) **testables**
+- **Hypothèse de valeur** + **métriques de succès** (outcome > output)
+- **Dépendances / Risques / Assomptions** documentés
+- **Sizing** (S/M/L ou points) ≤ **3 jours** par US ; estimation validée par l’équipe
+
+# ✅ Definition of Ready (DoR)
+- Problème utilisateur + persona **clairs**
+- Hypothèse de valeur + KPI **mesurables** (avec seuil de réussite)
+- Critères d’acceptation **Gherkin** complets (happy + erreurs + empty)
+- Designs/Figma liés + **tokens DS** à réutiliser indiqués
+- Dépendances (API/données/légal) identifiées + plan
+- Risques & Assomptions notés + mitigation
+- Tracking analytics défini (events, props, consent)
+- A11y & Perf (budgets LCP/INP/CLS) intégrés aux AC
+- Taille ≤ **3 jours** / story → sinon **SLICING**
+- PO/FE/BE/QA **alignés** → GO refinement
+
+# ✅ Definition of Done (DoD)
+- AC Gherkin **verts** (unit/e2e), QA ok (3 viewports, a11y clavier)
+- Tracking en place (events, guardrails)
+- Docs/ADR mises à jour ; changelog ; feature flags défaut **safe**
+- Perf budgets respectés (mobile), pas de secrets, logs sans PII
+
+# 🧩 Slicing & Sizing (ne pas réinventer la roue)
+- **Vertical first** (UI + API + stockage) pour livrer **une valeur utilisable**
+- **Patterns de découpe** :
+  - par **étape de flow** (ex: rechercher → sélectionner → payer)
+  - par **persona/segment** (admin, end-user)
+  - par **capabilité** (lecture d’abord, écriture ensuite)
+  - **erreurs/edge** dans une US dédiée si lourd
+  - **intégrations** isolées par fournisseur
+- **Anti-patterns** :
+  - découpe **horizontale** (UI seule, API seule)
+  - US « parapluie » / fourre-tout
+  - dépendances cachées / non planifiées
+- **Règle d’arrêt** : si une US ne tient pas en ≤ **3 jours**, **recouper**
+
+# 🧪 Critères d’acceptation — modèle Gherkin
+```gherkin
+Feature: <capabilité>
+  Scenario: Cas nominal
+    Given <pré-conditions claires>
+    When <action utilisateur>
+    Then <résultat observable pour l’utilisateur>
+    And <événement analytics> est tracké avec <props…>
+
+  Scenario: Erreur attendue
+    Given <contexte>
+    When <défaillance/erreur fournisseur>
+    Then <message actionnable> est affiché
+    And <aucun effet irréversible> n’est produit

@@ -1,34 +1,99 @@
 ---
-description:
-Rule 5 — frontend-ui
-
-Purpose: Construire UI réutilisable (React + Tailwind + shadcn/ui), accessible et responsive.
-Trigger: nouvelle feature UI / refonte composant.
-Inputs: user story + maquettes éventuelles.
-Output (repo + Notion):
-
-Composant React (states: default/hover/active/focus/disabled)
-
-Screenshots 1440/768/375
-
-Doc composant (props, usage, variantes)
-
-Steps
-
-Lister composants requis.
-
-Tenter d’abord shadcn/ui (extend si besoin).
-
-Implémenter avec grille 8px (Tailwind).
-
-Tester 3 viewports (pas de scroll horizontal).
-
-Audit a11y (contrast, tab order, aria).
-
-Doc + exemples d’usage.
-
-Do: tokens cohérents, dark mode accessible.
-Don’t: magic numbers, variations incohérentes.
-globs:
+description: |
+Règles d’implémentation FE (React/TS/Tailwind/shadcn/ui).
+Objectif: produire du code propre, accessible, performant et aligné DS.
+globs: - "**/*.{ts,tsx,js,jsx,css,scss}"
 alwaysApply: true
 ---
+# 🔧 Implémentation
+
+
+## 🧭 Avant de coder
+- Lire la spec + composants existants.
+- Identifier tokens DS (couleurs, radius, spacing, typo).
+- Définir variants `cva`.
+- Lister états: idle | hover | focus | active | disabled | loading | error | success | empty.
+
+
+## 🎨 Design System
+- Radix primitives + shadcn/ui obligatoires.
+- Pas de couleurs hex → tokens uniquement.
+- Spacing 4/8pt; pas de magic numbers.
+- Rounded cohérents (`lg|xl|2xl`).
+
+
+## ♿ Accessibilité
+- Navigation clavier complète.
+- Focus visible (`focus:ring-2`).
+- aria/alt pertinents.
+- Respect prefers-reduced-motion.
+
+
+## 📱 Responsive
+- Mobile-first (375 / 768 / 1440).
+- Dark mode & safe areas iOS.
+
+
+## ⚙️ Code
+- Props typées (pas d’`any`).
+- Hooks propres (`useEffect` avec cleanup).
+- Mémo uniquement si utile.
+
+
+## ⚡ Perf
+- États loading/empty/error obligatoires.
+- Images optimisées (next/image).
+- Split des composants lourds.
+
+
+## 🧱 Structure du code
+- Organisation **par feature** (feature folder) : `feature/` avec `components/`, `hooks/`, `services/`, `types/`.
+- Fichiers courts (< 200 lignes) et **une responsabilité** par fichier.
+- Co-localiser tests & stories : `Component.tsx`, `Component.test.tsx`, `Component.stories.tsx`.
+- Exports contrôlés : éviter le *barrel hell* ; un `index.ts` par feature avec API publique minimale.
+- Nommage consistant : `camelCase` utilitaires, `PascalCase` composants, `kebab-case` routes.
+- **Next.js** : préférer App Router ; séparer `server`/`client` ; actions serveur pour I/O.
+
+
+## 🧠 Simplicité des logiques
+- Préférer **fonctions pures** et **early return** ; imbrication ≤ 3 niveaux.
+- **Deriver state** plutôt que dupliquer ; éviter booléens croisés (préférer unions discriminées).
+- Pas de logique lourde dans le JSX : extraire en helpers/hook.
+- YAGNI : n’écrire que le nécessaire ; supprimer le code mort.
+
+
+## ♻️ Composants réutilisables
+- **Ne pas réinventer la roue** : **importer** d’abord les composants existants (shadcn/ui, primitives Radix, composants internes/DS) avant d’en créer de nouveaux. Si création nécessaire, **justifier l’écart**, prévoir **API compatible** et **ajout au DS** (doc + story + tests).
+- Extraire **primitives UI** (Button, Input, Modal, Badge) avec **variants `cva`**.
+- Props **cohérentes** (`size`, `intent`, `disabled`, `isLoading`) entre composants.
+- Favoriser **composition** (children/slots) vs. props monolithiques.
+- Storybook: **1 story par variant** avec controls.
+
+
+## ✨ Refactor après fonctionnement
+- Étapes : 1) faire marcher la feature ; 2) **tests** (unit/e2e) ; 3) **refactor** sans changer le comportement.
+- Objectifs : **DRY**, noms clairs, extraire duplications, réduire complexité cyclomatique, isoler I/O.
+- Post-refactor : relancer tests, vérifier bundle/INP, mettre à jour stories & docs.
+
+## 🧮 Scoring (ratio de conformité)
+- **Statuts** par règle: `APPLIED` (appliquée), `VIOLATED` (applicable mais non respectée), `N/A` (non applicable).
+- **Applicable =** `APPLIED + VIOLATED` (exclure `N/A`).
+- **Score =** `APPLIED / Applicable × 100` (arrondi à l'entier).
+- **Gate**: score ≥ **90%** **et** **0 Blocker**.
+- **Rapport**: lister les règles violées avec patch proposé.
+
+
+### Exemple
+- Règles applicables: 22 ; appliquées: 20 → Score = 20/22 = 91% → **OK** si aucun Blocker.
+
+## 🚫 Blockers
+- Non navigable au clavier / focus invisible.
+- Couleurs hors tokens.
+- États manquants.
+- `any` non justifié.
+
+
+## 🧰 Commandes
+```bash
+pnpm lint && pnpm typecheck && pnpm test -w
+pnpm storybook:build

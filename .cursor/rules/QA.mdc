@@ -1,34 +1,37 @@
 ---
-description:
-Rule 6 — qa-testing
-
-Purpose: Garantir qualité via Playwright (flows, edge cases, responsive, a11y).
-Trigger: avant merge/release, J4–J5.
-Inputs: critères d’acceptation, URL preview.
-Output (Notion + artifacts):
-
-QA Report (Blocker/High/Medium/Nit)
-
-Screenshots (3 viewports)
-
-Scripts tests/e2e/*.spec.ts
-
-Steps
-
-Dériver cas de test depuis acceptance criteria.
-
-Lancer 3 viewports (1440, 768, 375).
-
-Tester happy path, erreurs, empty/loading.
-
-Vérifier a11y clavier (tab/focus/enter/space).
-
-Capturer screenshots/console logs.
-
-Triage + création tickets.
-
-Do: preuves concrètes, messages reproductibles.
-Don’t: “ça marche chez moi” sans artefacts.
-globs:
-alwaysApply: true
+alwaysApply: false
 ---
+# ✅ QA Testing
+
+
+## 🔎 Steps
+1. Dériver cas de test depuis critères d’acceptation.
+2. Lancer 3 viewports (1440, 768, 375).
+3. Tester happy path, erreurs, empty/loading.
+4. Vérifier a11y clavier (tab/focus/enter/space).
+5. Capturer screenshots/console logs.
+6. Triage + création tickets.
+
+
+## 🧪 Bonnes pratiques
+- Do: preuves concrètes, messages reproductibles.
+- Don’t: “ça marche chez moi” sans artefacts.
+
+
+## 🔁 Réutilisation d'abord (QA)
+- **Page Objects** : utiliser les **PO** existants (`tests/e2e/pageObjects/*`) et les **fixtures** partagées (auth, données seed) au lieu de recréer.
+- **Sélecteurs** : s'appuyer sur les **data-testid** standardisés DS ; proscrire les sélecteurs CSS fragiles.
+- **Mocks réseau** : réutiliser la config **MSW/Playwright** commune pour scénarios (200/400/401/429/500) et timeouts.
+- **Plans de test** : dériver depuis **templates** acceptance existants ; ne pas diverger sans mise à jour de la source.
+
+
+## 🚫 Blockers
+- Flow critique bloqué.
+- Crash UI.
+- A11y KO.
+- Absence de captures/logs pour bug signalé.
+
+
+## 📊 Output attendu
+- Rapport QA trié par criticité (Blocker → High → Medium → Low).
+- Chaque bug = steps reproductibles + capture + logs.
