@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { insertClick } from '@/db/apiClicks';
-import { Copy, Trash, Check } from 'lucide-react';
+import { Copy, Trash, Check, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -21,15 +21,17 @@ import { LinkIcon } from 'lucide-react';
 import { getShortLink } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import ShortLinkButton from '@/components/short-link-button';
+import EditLinkDialog from '@/components/edit-link-dialog';
 
 
-const LinkCard = ({urls, onDelete}) => {
+const LinkCard = ({urls, onDelete, onEdit}) => {
   const navigate = useNavigate();
   const [isCopied, setIsCopied] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('success');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const handleCopyClick = async () => {
     try {
@@ -80,6 +82,13 @@ const LinkCard = ({urls, onDelete}) => {
       navigate(`/link/${urls.id}`);
       setIsOpening(false);
     }
+  };
+
+  const handleEditSuccess = () => {
+    if (onEdit) {
+      onEdit();
+    }
+    setEditDialogOpen(false);
   };
 
   return (
@@ -138,6 +147,22 @@ const LinkCard = ({urls, onDelete}) => {
           >
             {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
           </Button>
+
+          <EditLinkDialog
+            link={urls}
+            onSuccess={handleEditSuccess}
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+          >
+            <Button
+              variant="ghost"
+              title="Modifier le lien"
+              aria-label="Modifier le lien"
+              className="focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors duration-200 min-h-[44px] min-w-[44px]"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </EditLinkDialog>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>

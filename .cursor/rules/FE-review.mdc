@@ -37,6 +37,7 @@ alwaysApply: false
 
 ## 🧪 Tests
 - Unitaires + e2e critiques.
+- **Tests console** : validation des composants critiques en mode console.
 - Storybook complet.
 - Budgets bundle respectés.
 
@@ -59,3 +60,4 @@ alwaysApply: false
 ```bash
 pnpm lint && pnpm typecheck && pnpm test
 pnpm size-limit
+node qa-test-console.js  # Tests console QA

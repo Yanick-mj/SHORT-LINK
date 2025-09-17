@@ -1,76 +1,76 @@
 ---
-description: |
-  Rule — product_owner
-  But: affiner les User Stories, découper quand c’est trop gros, et garantir des US « prêtes » (DoR) avec critères d’acceptation testables.
-globs:
-  - "**/*"
-alwaysApply: true
+alwaysApply: false
 ---
-
 # 🧭 Objectif
-Produire des US **petites, testables et livrables** en continu, avec **valeur métier explicite**, **mesures de succès**, **risques maîtrisés** et **conformité** (fintech/PII).
+Produire des US **petites, testables et livrables** en continu, avec **valeur métier explicite**, **mesures de succès**, **user flow clair**, **logique fonctionnelle** et **risques maîtrisés**.
+
 
 # ⏱ Triggers
 - Backlog grooming / refinement
-- Une US > 3 jours-homme ou > 8 story points → **découper**
+- Une US > 3 jours-homme ou > 8 points → **découper**
 - Avant Sprint Planning / handoff vers FE/BE/QA
+
 
 # 📥 Inputs
 - Objectifs produit / KPI (North Star + guardrails)
 - US initiale (même vague)
 - Contraintes (tech, légales, design), analytics/insights
-- Liens: Figma, OpenAPI/ADR, DS, risques
+- Liens: Figma, OpenAPI/ADR, Design System, risques
+
 
 # 📤 Outputs (classés par criticité)
-- **US découpées et priorisées** : `P0 Blocker` (indispensable), `P1` (important), `P2` (amélioration), `P3` (nice-to-have)
-- **Critères d’acceptation Gherkin** (Given/When/Then) **testables**
+- **US découpées et priorisées** : `P0 Blocker` (indispensable), `P1` (important), `P2` (amélioration), `P3` (nice‑to‑have)
+- **User Flow** du parcours principal + variantes (erreurs/edge) : étapes, décisions, actions **système/utilisateur** ; **lien** (Figma/Whimsical/Mermaid) ; **mapping** vers AC et composants UI
+- **Logique fonctionnelle** (state machine / règles métier) : états (`idle/loading/success/error/empty`), transitions, **préconditions/postconditions**, messages d’erreur **actionnables**
+- **Critères d’acceptation** en **Gherkin** (Given/When/Then), couvrant happy path + erreurs + empty
 - **Hypothèse de valeur** + **métriques de succès** (outcome > output)
 - **Dépendances / Risques / Assomptions** documentés
-- **Sizing** (S/M/L ou points) ≤ **3 jours** par US ; estimation validée par l’équipe
+- **Taille** (S/M/L ou points) ≤ 3 jours/US ; **estimation** validée par l’équipe
+
 
 # ✅ Definition of Ready (DoR)
 - Problème utilisateur + persona **clairs**
+- **User Flow** fourni et lié (parcours principal + chemins d’erreur), validé avec FE & QA
 - Hypothèse de valeur + KPI **mesurables** (avec seuil de réussite)
 - Critères d’acceptation **Gherkin** complets (happy + erreurs + empty)
 - Designs/Figma liés + **tokens DS** à réutiliser indiqués
-- Dépendances (API/données/légal) identifiées + plan
+- Dépendances identifiées (API/données/légal) + plan
 - Risques & Assomptions notés + mitigation
 - Tracking analytics défini (events, props, consent)
 - A11y & Perf (budgets LCP/INP/CLS) intégrés aux AC
 - Taille ≤ **3 jours** / story → sinon **SLICING**
 - PO/FE/BE/QA **alignés** → GO refinement
 
+
 # ✅ Definition of Done (DoD)
 - AC Gherkin **verts** (unit/e2e), QA ok (3 viewports, a11y clavier)
-- Tracking en place (events, guardrails)
+- Tracking en place (events + guardrails)
 - Docs/ADR mises à jour ; changelog ; feature flags défaut **safe**
 - Perf budgets respectés (mobile), pas de secrets, logs sans PII
 
+
 # 🧩 Slicing & Sizing (ne pas réinventer la roue)
 - **Vertical first** (UI + API + stockage) pour livrer **une valeur utilisable**
-- **Patterns de découpe** :
-  - par **étape de flow** (ex: rechercher → sélectionner → payer)
-  - par **persona/segment** (admin, end-user)
-  - par **capabilité** (lecture d’abord, écriture ensuite)
-  - **erreurs/edge** dans une US dédiée si lourd
-  - **intégrations** isolées par fournisseur
-- **Anti-patterns** :
-  - découpe **horizontale** (UI seule, API seule)
-  - US « parapluie » / fourre-tout
-  - dépendances cachées / non planifiées
-- **Règle d’arrêt** : si une US ne tient pas en ≤ **3 jours**, **recouper**
+- **Patterns** : par **étape de flow** (rechercher → sélectionner → payer), par **persona**, par **capabilité** (lecture puis écriture), **erreurs** dédiées si lourd, **intégrations** par fournisseur
+- **Anti‑patterns** : découpe **horizontale** (UI seule / API seule), US « parapluie », dépendances cachées
+- **Règle d’arrêt** : si une US > **3 jours**, **recouper**
 
-# 🧪 Critères d’acceptation — modèle Gherkin
-```gherkin
-Feature: <capabilité>
-  Scenario: Cas nominal
-    Given <pré-conditions claires>
-    When <action utilisateur>
-    Then <résultat observable pour l’utilisateur>
-    And <événement analytics> est tracké avec <props…>
 
-  Scenario: Erreur attendue
-    Given <contexte>
-    When <défaillance/erreur fournisseur>
-    Then <message actionnable> est affiché
-    And <aucun effet irréversible> n’est produit
+# 🧭 User Flow (obligatoire)
+- Formats : **Mermaid**, **Whimsical**, **Figma wireflow** (lien requis)
+- Doit couvrir : **Start/End**, étapes utilisateur, **décisions (diamants)**, **actions système**, **états** (loading/empty/error/success), **chemins d’erreur** (timeouts, 4xx/5xx), **événements analytics** (nom + props)
+- Qualité : chaque étape mappe vers **un AC Gherkin** et **un composant/UI** ; les erreurs majeures ont un message **actionnable**
+
+
+Exemple (Mermaid)
+```mermaid
+flowchart TD
+A[Start] --> B[Ouvrir page Paiement]
+B --> C{Carte validée ?}
+C -- Oui --> D[Déclencher 3DS]
+D --> E{3DS OK ?}
+E -- Oui --> F[Confirmer commande]
+F --> G[Track "purchase" {order_id, amount}]
+C -- Non --> E1[Afficher erreur de saisie]
+E -- Non --> E2[Message actionnable + Retry]
+G --> H[End]

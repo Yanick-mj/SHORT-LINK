@@ -39,8 +39,25 @@ alwaysApply: false
 - **Stories/Fixtures** : réutiliser les **stories** et **fixtures** existantes pour couvrir les variants/états avant d'en créer de nouvelles.
 - **Tokens** : contrôler que spacing/couleurs/typo proviennent des **tokens DS**, pas d'override local arbitraire.
 
+## 🔀 User Flow & Logique fonctionnelle
+- **Reconstituer le user flow** (parcours principal + erreurs) à partir de la preview et des AC.
+- Vérifier **états & transitions** : `idle → loading → success/error/empty`, retour focus, désactivation pendant `loading`.
+- Tester **décisions** (conditions/choix) et **actions système** (requêtes, redirections, toasts, analytics).
+- Couvrir **edge cases** : timeouts, 4xx/5xx, validation, absence de données, double-click/double submit (**idempotence**), offline/retry.
+- Vérifier **navigation** (back, deeplink) → aucun cul-de-sac ; le chemin **clavier** = chemin pointeur.
+- Vérifier **events analytics** (nommage/props) sur les étapes clés, selon les AC.
+
+## Livrables (logique & flow)
+- **Table de mapping** Flow → Écran/Composant → **AC** → États couverts.
+- **Diagramme de flow** (lien Mermaid/Whimsical/Figma) **tel que testé**.
+- **Matrice d’events** (étape → event → props → OK/KO).
+- **Liste d’edge cases** testés + résultats (Pass/Fail) **classés par criticité**.
 
 ## 🚫 Blockers
+- **User flow brisé** (impasse, back/deeplink bloqués).
+- **User flow brisé** (impasse, back/deeplink bloqués).
+- **États d’erreur/empty manquants** sur un chemin critique.
+- **Double submit** possible sans garde/idempotence sur action sensible.
 - Contraste < AA.
 - Non navigable clavier.
 - Pas de feedback >1s.

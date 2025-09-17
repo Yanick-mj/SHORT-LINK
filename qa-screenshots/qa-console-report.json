@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-09-17T14:35:07.854Z",
+  "summary": {
+    "passed": 11,
+    "failed": 0,
+    "total": 11
+  },
+  "errors": [],
+  "logs": [
+    {
+      "message": "Taille de la page: 632 caractères",
+      "timestamp": "2025-09-17T14:35:04.738Z"
+    },
+    {
+      "message": "Output build: 363 caractères",
+      "timestamp": "2025-09-17T14:35:07.853Z"
+    }
+  ]
+}

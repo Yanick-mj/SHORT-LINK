@@ -5,12 +5,16 @@ alwaysApply: false
 
 
 ## 🔎 Steps
-1. Dériver cas de test depuis critères d’acceptation.
+1. Dériver cas de test depuis critères d'acceptation.
 2. Lancer 3 viewports (1440, 768, 375).
 3. Tester happy path, erreurs, empty/loading.
-4. Vérifier a11y clavier (tab/focus/enter/space).
-5. Capturer screenshots/console logs.
-6. Triage + création tickets.
+4. **Tester chaque bouton/action individuellement** (créer, éditer, supprimer, copier).
+5. **Vérifier les interactions complètes** (dialog qui s'ouvre, formulaires qui se remplissent).
+6. Vérifier a11y clavier (tab/focus/enter/space).
+7. **Tests de régression** : vérifier que les fonctionnalités existantes marchent encore.
+8. **Tests console** : validation des composants critiques en mode console.
+9. Capturer screenshots/console logs.
+10. Triage + création tickets.
 
 
 ## 🧪 Bonnes pratiques
@@ -29,9 +33,31 @@ alwaysApply: false
 - Flow critique bloqué.
 - Crash UI.
 - A11y KO.
+- **Bouton/action ne fonctionne pas** (onClick non connecté, dialog ne s'ouvre pas).
+- **Formulaires non fonctionnels** (validation, soumission, pré-remplissage).
 - Absence de captures/logs pour bug signalé.
 
 
 ## 📊 Output attendu
 - Rapport QA trié par criticité (Blocker → High → Medium → Low).
 - Chaque bug = steps reproductibles + capture + logs.
+
+## ✅ Checklist QA - Interactions UI
+- [ ] **Bouton Créer** : Dialog s'ouvre, formulaire fonctionne
+- [ ] **Bouton Éditer** : Dialog s'ouvre, champs pré-remplis, sauvegarde fonctionne
+- [ ] **Bouton Supprimer** : Confirmation s'affiche, suppression fonctionne
+- [ ] **Bouton Copier** : Lien copié dans le presse-papier, feedback visuel
+- [ ] **Navigation** : Tous les liens fonctionnent, retour marche
+- [ ] **Formulaires** : Validation temps réel, soumission, gestion erreurs
+- [ ] **Dialogs** : Ouverture/fermeture, focus management, escape key
+- [ ] **États loading** : Affichage pendant les requêtes, désactivation boutons
+
+## ✅ Checklist QA - Tests Console
+- [ ] **Connectivité** : Application accessible (HTTP 200)
+- [ ] **Composants critiques** : Fichiers présents et fonctionnels
+- [ ] **Configuration** : Variables d'environnement et imports validés
+- [ ] **Validation** : Schema yup et gestion d'erreurs
+- [ ] **Accessibilité** : Attributs ARIA présents
+- [ ] **Régression** : Fonctionnalités existantes préservées
+- [ ] **Performance** : Build sans erreur
+- [ ] **Rapport** : JSON généré avec résultats détaillés

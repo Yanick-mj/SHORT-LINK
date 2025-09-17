@@ -2,6 +2,10 @@
 description:
 Rule — performance
 
+globs:
+alwaysApply: false
+---
+
 Purpose: Mesurer et améliorer les performances front (Core Web Vitals) et back (latence API, BDD Supabase), avec des budgets clairs et des preuves (rapports + captures).
 Trigger: avant release, après gros refactors FE/BE, régression de vitesse, ou seuils dépassés en prod.
 Inputs: URL preview/prod, endpoints clés, scripts k6/autocannon (si existants), requêtes SQL critiques.
@@ -108,6 +112,3 @@ reports/webvitals-{flow}.json
 reports/api-latency.csv (route, P50/P95/P99, TTFB)
 
 reports/db-explain-{query}.txt
-globs:
-alwaysApply: true
----

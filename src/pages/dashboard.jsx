@@ -93,6 +93,13 @@ const Dashboard = () => {
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
+  // Fonction pour recharger les données après modification
+  const handleEditSuccess = () => {
+    fetchData();
+    setSuccessMessage('Lien modifié avec succès');
+    setTimeout(() => setSuccessMessage(''), 3000);
+  };
+
   // Calculer les statistiques avec useMemo pour optimiser les performances
   const { totalUrls, totalClicks } = useMemo(() => {
     const totalUrls = urlsData.length;
@@ -205,7 +212,7 @@ const Dashboard = () => {
         ) : (
           filteredUrls.map((url) => (
             <div key={url.id} className='flex-1'>
-              <LinkCard urls={url} onDelete={handleDeleteUrl} />
+              <LinkCard urls={url} onDelete={handleDeleteUrl} onEdit={handleEditSuccess} />
             </div>
           ))
         )}

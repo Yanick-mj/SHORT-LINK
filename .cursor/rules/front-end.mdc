@@ -1,9 +1,5 @@
 ---
-description: |
-Règles d’implémentation FE (React/TS/Tailwind/shadcn/ui).
-Objectif: produire du code propre, accessible, performant et aligné DS.
-globs: - "**/*.{ts,tsx,js,jsx,css,scss}"
-alwaysApply: true
+alwaysApply: false
 ---
 # 🔧 Implémentation
 
@@ -35,8 +31,10 @@ alwaysApply: true
 
 
 ## ⚙️ Code
-- Props typées (pas d’`any`).
+- Props typées (pas d'`any`).
 - Hooks propres (`useEffect` avec cleanup).
+- **Vérification des états critiques** : `user`, `loading`, `error` avant utilisation.
+- **Early return** pour les cas d'erreur d'authentification.
 - Mémo uniquement si utile.
 
 
@@ -91,9 +89,20 @@ alwaysApply: true
 - Couleurs hors tokens.
 - États manquants.
 - `any` non justifié.
+- **Authentification non vérifiée** avant utilisation de `user.id`.
+- **Cas d'erreur d'API** non gérés (user null, accès refusé).
 
 
 ## 🧰 Commandes
 ```bash
 pnpm lint && pnpm typecheck && pnpm test -w
 pnpm storybook:build
+node qa-test-console.js  # Tests d'intégration critiques
+```
+
+## ✅ Checklist Critique - États d'Authentification
+- [ ] **Vérifier `user`** avant utilisation de `user.id`
+- [ ] **Early return** si `!user || !user.id`
+- [ ] **Gestion d'erreur** pour "accès non autorisé"
+- [ ] **Validation des props** API (id, user_id)
+- [ ] **Tests d'intégration** pour cas d'erreur d'auth

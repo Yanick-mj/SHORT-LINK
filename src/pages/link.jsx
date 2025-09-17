@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Copy, Trash, Check, ArrowLeft } from 'lucide-react';
+import { Copy, Trash, Check, ArrowLeft, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -24,6 +24,7 @@ import { LinkIcon } from 'lucide-react';
 import { getShortLink } from '@/lib/utils';
 import ShortLinkButton from '@/components/short-link-button';
 import { logger } from '@/lib/logger';
+import EditLinkDialog from '@/components/edit-link-dialog';
 
 
 const Link = () => {
@@ -38,6 +39,7 @@ const Link = () => {
   const DOMAIN = import.meta.env.VITE_PUBLIC_SHORT_DOMAIN || 'https://short.in';
   const [alertMessage, setAlertMessage] = useState(null);
   const [alertType, setAlertType] = useState('success');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -102,6 +104,22 @@ const Link = () => {
       setAlertMessage('Erreur lors de la suppression du lien');
       setIsDeleting(false);
     }
+  };
+
+  const handleEditSuccess = () => {
+    // Recharger les données du lien après modification
+    const fetchData = async () => {
+      try {
+        const url = await getUrlById(id);
+        if (url) {
+          setUrlData(url);
+        }
+      } catch (err) {
+        logger.error('Erreur lors du rechargement:', err);
+      }
+    };
+    fetchData();
+    setEditDialogOpen(false);
   };
 
   if (loading) {
@@ -229,6 +247,22 @@ const Link = () => {
                   >
                     {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                   </Button>
+
+                  <EditLinkDialog
+                    link={urlData}
+                    onSuccess={handleEditSuccess}
+                    open={editDialogOpen}
+                    onOpenChange={setEditDialogOpen}
+                  >
+                    <Button
+                      variant="ghost"
+                      title="Modifier le lien"
+                      aria-label="Modifier le lien"
+                      className="min-h-[44px] min-w-[44px]"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </EditLinkDialog>
 
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
