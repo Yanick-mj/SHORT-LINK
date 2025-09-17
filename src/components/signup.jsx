@@ -8,7 +8,7 @@ import BeatLoader from "react-spinners/BeatLoader";
 import Error from "@/components/error";
 import * as Yup from "yup";
 import { signup as signupApi } from "@/db/apiAuth";
-import { data, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Signup = () => {
   const [errors, setErrors] = useState({});
