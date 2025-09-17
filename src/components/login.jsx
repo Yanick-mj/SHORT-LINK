@@ -64,7 +64,7 @@ const Login = () => {
       <Card>
         <CardHeader>
           <CardTitle>Login</CardTitle>
-          <CardDescription>To your accoiunt if already have onen</CardDescription>
+          <CardDescription>To your account if already have one</CardDescription>
           {networkError && <Error message={networkError} />}
         </CardHeader>
 
